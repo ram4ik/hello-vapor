@@ -1,17 +1,26 @@
 import Fluent
 import Vapor
 
+struct Movie: Content {
+    let name: String
+    let year: Int
+}
+
 func routes(_ app: Application) throws {
-    app.get { req in
-        return "It works!"
+    
+    app.get("movies") { req in
+        return Movie(name: "Lord of the Rings", year: 2002)
     }
     
-    app.get("hello") { req in
-        return "Hello, world!"
+    app.get("movies", "genre", ":genre") { req -> String in
+        
+        let genre = req.parameters.get("genre") ?? ""
+        return "The genre value is \(genre)"
     }
-
-    let todoController = TodoController()
-    app.get("todos", use: todoController.index)
-    app.post("todos", use: todoController.create)
-    app.on(.DELETE, "todos", ":todoID", use: todoController.delete)
+    
+    app.post("add-movie") { req -> Movie in
+        
+        let movie = try? req.content.decode(Movie.self)
+        return movie!
+    }
 }
